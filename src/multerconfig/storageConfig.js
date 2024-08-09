@@ -3,14 +3,21 @@ import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 const path = require('path');
+const fs = require('fs');
 
-// Get the directory name of the current module
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+let __dirname = path.dirname(new URL(import.meta.url).pathname);
 
-// Storage config
+if (process.platform === 'win32') {
+    __dirname = __dirname.substring(1);
+}
+
+const uploadPath = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadPath)) {
+    fs.mkdirSync(uploadPath, { recursive: true });
+}
+
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
-        const uploadPath = path.join(__dirname, 'uploads'); // Corrected path
         callback(null, uploadPath);
     },
     filename: (req, file, callback) => {
@@ -19,7 +26,6 @@ const storage = multer.diskStorage({
     }
 });
 
-// Filter
 const fileFilter = (req, file, callback) => {
     if (["image/png", "image/jpg", "image/jpeg"].includes(file.mimetype)) {
         callback(null, true);
