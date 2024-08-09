@@ -1,5 +1,5 @@
 import Task from "../models/task.js";
-import  user from '../models/user.js' 
+import user from '../models/user.js';
 import mongoose from "../models/index.js";
 
 
@@ -363,4 +363,4 @@ export default{
     getAllTask,
     deleteTask,
     editTask
-}
+};

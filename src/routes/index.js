@@ -1,16 +1,14 @@
-import express  from 'express'
-import UserRoutes from './user.js'
-import TicketsRoutes from './tickets.js'
-import TaskRoutes from './task.js'
-const router = express.Router()
+import express from 'express';
+import UserRoutes from './user.js';
+import TicketsRoutes from './tickets.js';
+import TaskRoutes from './task.js';
+import fileUpload from '../controllers/fileUpload.js';
+import upload from '../multerconfig/storageConfig.js';
+const router = express.Router();
 
+router.use('/user', UserRoutes);
+router.use('/tickets', TicketsRoutes);
+router.use('/task', TaskRoutes);
+router.post('/upload', upload.single('file'), fileUpload);
 
-router.get('/', (req, res) => {
-    res.status(200).send(`
-   Welcome to Backend of CRM `)
-})
-router.use('/user', UserRoutes)
-router.use('/tickets', TicketsRoutes)
-router.use('/task', TaskRoutes)
-
-export default router
+export default router;
