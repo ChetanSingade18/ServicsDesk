@@ -18,114 +18,60 @@ import mongoose from "./index.js";
 //       return e ==;
   
 // }
-
-
+const employeeSchema = new mongoose.Schema({
+    fullName: {
+        type: String,
+    },
+    mobile: {
+        type: String
+    },
+    userPhotoUrl: {
+        type:String
+    },
+    employeeId: {
+        type:String
+    },
+    address: {
+        type:String
+    },
+    bloodGroup:{
+        type:String
+    },
+    dateOfBirth: {
+        type:String
+    },
+}, {
+    _id: false
+})
 
 const userSchema = new mongoose.Schema({
-// firstName:{
-//     type:String,
-//      require:[true,"First Name is Required"],
-//      trim: true
-//     },
-
-//     lastName:{
-//         type:String,
-//          require:[true,"Last Name is Required"],
-//          trim: true
-//         },
-        // email: {
-        //     type: String,
-        //     required: [true,"Last Name is Required"],
-        //     unique: true,
-        //     validate(value) {
-        //         if (!validator.isEmail(value)) {
-        //             throw Error("not valid email")
-        //         }
-        //     }
-        // },
-        // mobile: {
-        //     type: String,
-        //     required: [true,"mobile number is Required"],
-        //     unique: true,
-        //     minlength: 10,
-        //     maxlength: 10
-        // },
-        //  gender: {
-        //     type: String,
-        //     required: [true,"gender is Required"],
-        // },
-         password:{
-            type:String,
-            required:[true,"Password is required"]
-        },
-
-
-        resetPasswordToken: {
-            type: String,
-          },
-          resetPasswordExpires: {
-            type: Date,
-          },
-
-        status: {
-            type: String,
-            required:[true,"Status is Required"],
-            enum: ['Active' , 'InActive'],
-            default: 'Active',
-           
-        },
-        // profile: {
-        //     type: String,
-        //     required: [true,"profile is Required"],
-        // },
-        // location: {
-        //     type: String,
-        //     required: [true,"location is Required"],
-        // },
-            // status:{
-            //     type:Boolean,
-            //     default:true
-            // },
-            role:{
-                type:String,
-                default:'user'
-            },
-
-
-            name: {
-                type: String,
-                required: true,
-                
-            },
-            email: {
-                type: String,
-                required: true,
-                unique: true,
-            },
-            // age: {
-            //     type: String,
-            //     required: true,
-            // },
-            mobile: {
-                type: Number,
-                required: true,
-            },
-            // work: {
-            //     type: String,
-            //     required: true,
-            //     trim: true
-            // },
-            add: {
-                type: String,
-                required: true,
-            },
-            desc: {
-                type: String,
-                required: true,
-            },
+        password:{
+        type:String,
+        required:[true,"Password is required"]
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    userName: {
+        type:String,
+        required:true,
+        unique:true
+    },
+    status: {
+        type: String,
+        enum: ['Active' , 'InActive'],
+        default: 'Active',
         
-            datecreated:Date,
-            dateUpdated:Date
+    },
+    role:{
+        type:String,
+        default:'user'
+    },
+    employeeDetails: employeeSchema,
+    datecreated:Date,
+    dateUpdated:Date
          
 
 },{ 

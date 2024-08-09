@@ -113,13 +113,10 @@ const getTicketsByUserId = async(req,res)=>{
         let tickets= await ticketModel.find({createdBy:req.headers.userId},{_id:1,title:1,imageUrl:1,createdAt:1,status:1,reason:1}).sort({createdAt:1})
         const totalTickets = await ticketModel.countDocuments({ createdBy:req.headers.userId });
 
-        // Fetch total number of resolved tickets for the user
         const resolvedTickets = await ticketModel.countDocuments({ createdBy:req.headers.userId, status: Status.RESOLVED });
 
-        // Fetch total number of pending tickets for the user
         const pendingTickets = await ticketModel.countDocuments({ createdBy:req.headers.userId, status: Status.PENDING });
 
-        // Fetch total number of approved tickets for the user
         const approvedTickets = await ticketModel.countDocuments({ createdBy:req.headers.userId, status: Status.APPROVED });
 
         
