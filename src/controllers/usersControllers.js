@@ -39,11 +39,13 @@ const create =async(req,res)=>{
 
 const login = async (req,res)=>{
     try {
+        console.log(req.body);
         let user = await users.findOne({email:req.body.email})
         if(user){
             let hashCompare = await Auth.hashCompare(req.body.password,user.password)
-      
+            
         if(hashCompare){
+            console.log("create token");
             let token = await Auth.createToken({
             id:user._id,
             name:user.name,
@@ -60,7 +62,7 @@ const login = async (req,res)=>{
 
             })
 
-            let userData = await users.findOne({email:req.body.email},{_id:0,password:0,createdAt:0,email:0})
+            let userData = await users.findOne({email:req.body.email},{password:0,createdAt:0})
             res.status(200).send({
                 message:"login Successfull",
                 token,
@@ -216,7 +218,7 @@ const updateUserData =async(req,res)=>{
     try {
         const {id} = req.params;
         // const hashedPassword = await Auth.hashPassword(password);
-                       
+        
         req.body.password = await Auth.hashPassword(req.body.password)
         const updateduser = await users.findByIdAndUpdate(id,req.body,{
             new:true

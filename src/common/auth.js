@@ -5,20 +5,22 @@ import  jwt  from 'jsonwebtoken'
 
 
 const hashPassword =async(password)=>{
-let salt= await bcrypt.genSalt(Number(process.env.SALT_ROUNDS))
+let salt= await bcrypt.genSalt(10)
 let hash = await bcrypt.hash(password,salt)
 return hash
 
 }
 
 const hashCompare = async (password,hash)=>{
+    console.log("inside compare");
     return await bcrypt.compare(password,hash)
 
 }
 
 const createToken = async(payload)=>{
-    const token = await jwt.sign(payload,process.env.JWT_SECRET,{
-        expiresIn:process.env.JWT_EXPIRE
+    console.log("inside create token");
+    const token = await jwt.sign(payload,"hackathon_servicedesk_secret_key",{
+        expiresIn:"1hr"
     })
     return token
 }
@@ -29,23 +31,27 @@ const decodeToken = async(token)=>{
 }
 
 const validate = async(req,res,next)=>{
-    let token = req.headers.authorization?.split(" ")[1]
-    if(token)
-    {
-        let payload = await decodeToken(token)
-        req.headers.userId = payload.id
-        let currentTime = (+new Date())/1000
-        
-        if(currentTime<payload.exp)
+    try{
+        let token = req.headers.authorization?.split(" ")[1]
+        if(token)
         {
-            next()
+            let payload = await decodeToken(token)
+            req.headers.userId = payload.id
+            let currentTime = (+new Date())/1000
+            
+            if(currentTime<payload.exp)
+            {
+                next()
+            }
+            else
+                res.status(401).send({message:"Token Expired"})
         }
         else
-            res.status(401).send({message:"Token Expired"})
-    }
-    else
-    {
-        res.status(401).send({message:"No Token Found"})
+        {
+            res.status(401).send({message:"No Token Found"})
+        }
+    }catch(err){
+        res.status(401).send({message:"Token Invalid"});
     }
 }
 
