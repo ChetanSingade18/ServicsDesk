@@ -41,7 +41,7 @@ const login = async (req, res) => {
                 console.log("create token");
                 let token = await Auth.createToken({
                     id: user._id,
-                    name: user.name,
+                    userName: user.userName,
                     email: user.email,
                     role: user.role,
                     status: user.status
@@ -52,7 +52,7 @@ const login = async (req, res) => {
                     //  status:user.status 
                 })
 
-                let userData = await users.findOne({ email: req.body.email }, { password: 0, createdAt: 0 });
+                let userData = await users.findOne({ email: req.body.email }, { password: 0, createdAt: 0, generatedOTP: 0, generatedOTPExpires: 0});
                 res.status(200).send({
                     message: "login Successfull",
                     token,
@@ -235,11 +235,8 @@ const deleteUser = async (req, res) => {
 };
 
 
-// resetpassword
-
-
-
-const resetpassword = async (req, res) => {
+// forgot password
+const forgetpassword = async (req, res) => {
     const { email } = req.body;
     try {
         let user = await users.findOne({ email });
@@ -247,7 +244,6 @@ const resetpassword = async (req, res) => {
             return res.status(404).send({ message: "user not found" });
         }
 
-        // const token = Math.random().toString(36).slice(-8);
         const generateOTP = () => {
             const characters = "0123456789";
             return Array.from(
@@ -255,28 +251,29 @@ const resetpassword = async (req, res) => {
                 () => characters[Math.floor(Math.random() * characters.length)]
             ).join("");
         };
-        const token = generateOTP();
-        user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 300000; //5 minutes
+        const otp = generateOTP();
+        user.generatedOTP = otp;
+        user.generatedOTPExpires = Date.now() + 300000; //5 minutes
 
         await user.save();
+        console.log("Reset Password User:", user);
 
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
-                user: process.env.USER_MAILER,
-                pass: process.env.PASS_MAILER,
+                user: "sender's email address", //TODO
+                pass: "sender's password", //TODO
             },
         });
-        const resetUrl = `${`https://customer-relationship-management-mern.netlify.app/user/resetpassword`}`;
+        const resetUrl = `${`https://customer-relationship-management-mern.netlify.app/user/resetpassword`}`; //TODO
 
         const mailOptions = {
-            from: "harishvinayagamoorthi@gmail.com",
+            from: "sender's email address", //TODO
             to: user.email,
             subject: "Password Reset Request",
             html: `
-        <p>Dear ${user.firstName} ${user.lastName},</p>
-        <p>We received a request to reset your password. Here is your One-Time Password (OTP): <strong>${token}</strong></p>
+        <p>Dear ${user.employeeDetails.fullName},</p>
+        <p>We received a request to reset your password. Here is your One-Time Password (OTP): <strong>${otp}</strong></p>
         <p>This OTP is Expired in 5 minutes </p>
         <p>Please click the following link to reset your password:</p>
         <a href=${resetUrl}>Reset Password</a>
@@ -303,39 +300,42 @@ const resetpassword = async (req, res) => {
     }
 };
 
-
-
-
-// Token Verfication
 // Token Verification and Password Reset
-const passwordtoken = async (req, res) => {
+const resetpassword = async (req, res) => {
     try {
-        const { token } = req.body;
-        const { password } = req.body;
+        const { otp, password, confirmPassword } = req.body;
 
-        console.log("Received token:", token);
-
-        const user = await users.findOne({
-            resetPasswordToken: token,
-            resetPasswordExpires: { $gt: Date.now() },
-        });
-
-        console.log("Found user:", user);
-
-        if (!user) {
-            return res.status(404).json({ message: "Invalid OTP" });
+        if (!("otp" in req.body) || !("password" in req.body) || !("confirmPassword" in req.body)) {
+            return res.status(404).send({ message: "otp or password or confirmPassword is missing !!!" })
         }
 
-        if (user.resetPasswordExpires < Date.now()) {
-            return res.status(401).json({ message: "OTP Expires" });
-        } else {
-            console.log("Resetting password for user:", user.email);
-            user.password = await Auth.hashPassword(password);
-            user.resetPasswordToken = null;
-            user.resetPasswordExpires = null;
-            await user.save();
+        console.log("Received otp:", otp);
 
-            res.json({ message: "Password reset successfully" });
+        if (password === confirmPassword) {
+            const user = await users.findOne({
+                generatedOTP: otp,
+                generatedOTPExpires: { $gt: Date.now() },
+            });
+
+            console.log("Found user:", user);
+
+            if (!user) {
+                return res.status(404).json({ message: "Invalid OTP" });
+            }
+
+            if (user.generatedOTPExpires < Date.now()) {
+                return res.status(401).json({ message: "OTP Expires" });
+            } else {
+                console.log("Resetting password for user:", user.email);
+                user.password = await Auth.hashPassword(password);
+                user.generatedOTP = null;
+                user.generatedOTPExpires = null;
+                await user.save();
+
+                res.json({ message: "Password reset successfully" });
+            }
+        } else {
+            res.json({ message: "Confirm Password does not match with the above Password" })
         }
     } catch (error) {
         console.error(error);
@@ -351,6 +351,6 @@ export default {
     getIndividualUser,
     updateUserData,
     deleteUser,
-    resetpassword,
-    passwordtoken
+    forgetpassword,
+    resetpassword
 };

@@ -46,6 +46,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, "Password is required"]
     },
+    generatedOTP: {
+        type: String,
+    },
+    generatedOTPExpires: {
+        type: Date,
+    },
     email: {
         type: String,
         required: true,
@@ -60,7 +66,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['Active', 'InActive'],
         default: 'Active',
-
     },
     role: {
         type: String,
