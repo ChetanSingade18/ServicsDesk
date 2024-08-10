@@ -15,7 +15,9 @@ router.get("/getuser/:id", UserController.getIndividualUser);
 
 router.put("/updateuser/:id", Auth.validate, UserController.updateUserData);
 router.delete("/deleteuser/:id", UserController.deleteUser);
+
+//Password Reset Routes
+router.post("/forgotpassword", UserController.forgetpassword);
 router.post("/resetpassword", UserController.resetpassword);
-router.post("/reset-password", UserController.passwordtoken);
 
 export default router;
