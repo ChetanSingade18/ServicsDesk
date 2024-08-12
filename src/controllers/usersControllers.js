@@ -261,14 +261,14 @@ const forgetpassword = async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
-                user: "sender's email address", //TODO
-                pass: "sender's password", //TODO
+                user: "servicedesk.kfin@gmail.com", //TODO
+                pass: "vykthcnqfjmspcwq", //TODO
             },
         });
         const resetUrl = `${`https://customer-relationship-management-mern.netlify.app/user/resetpassword`}`; //TODO
 
         const mailOptions = {
-            from: "sender's email address", //TODO
+            from: "servicedesk.kfin@gmail.com", //TODO
             to: user.email,
             subject: "Password Reset Request",
             html: `
