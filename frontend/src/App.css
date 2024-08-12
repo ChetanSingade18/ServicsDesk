@@ -1,0 +1,106 @@
+:root {
+  --primary-color: #4a4e69; /* Dark pastel blue-gray */
+  --secondary-color: #6b6e85; /* Lighter pastel blue-gray */
+  --accent-color: #9a8c98; /* Pastel purple-pink */
+  --background-color: #22223b; /* Dark navy blue */
+  --text-color: #f2e9e4; /* Light off-white */
+  --drawer-background: #2786ac; /* Contrasting background for the drawer */
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: Arial, sans-serif;
+}
+
+.drawer {
+  width: 240px;
+  flex-shrink: 0;
+  background-color: var(--drawer-background);
+  color: var(--text-color);
+}
+
+.drawerPaper {
+  width: 240px;
+  background-color: var(--drawer-background);
+  color: var(--text-color);
+  position: relative; /* Ensure it aligns properly */
+}
+
+.appBar {
+  z-index: 1201;
+  background-color: var(--secondary-color) !important;
+  color: var(--text-color) !important;
+}
+
+.content {
+  flex-grow: 1;
+  padding: 16px;
+}
+
+.formContainer {
+  border-radius: 15px;
+  padding: 16px;
+  margin: 8px;
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.formContainer:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Additional styles for tabs, buttons, and other components */
+.MuiTab-root {
+  color: var(--text-color) !important;
+}
+
+.MuiButton-root {
+  background-color: var(--accent-color) !important;
+  color: var(--text-color) !important;
+}
+
+/* Centering the Signin and Signup pages */
+.centered-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+}
+
+.form-container {
+  width: 100%;
+  max-width: 400px; /* Maximum width for the form */
+  padding: 20px;
+  background-color: #f5f5f5; /* Light background color */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Styling buttons on the home page */
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Space between buttons */
+}
+
+.button {
+  padding: 10px 20px; /* Padding for buttons */
+  border: none;
+  border-radius: 5px; /* Rounded corners */
+  background-color: #3f51b5; /* Primary color */
+  color: white; /* Text color */
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.button:hover {
+  background-color: #303f9f; /* Darker shade on hover */
+}
+
+.button:focus {
+  outline: none; /* Remove outline on focus */
+}
