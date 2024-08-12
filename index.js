@@ -4,7 +4,7 @@ import AppRoutes from './src/routes/index.js';
 import cors from 'cors';
 
 dotenv.config();
-const PORT = 3000;
+const PORT = 4000;
 
 const app = express();
 

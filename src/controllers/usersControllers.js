@@ -199,10 +199,17 @@ const getIndividualUser = async (req, res) => {
 const updateUserData = async (req, res) => {
     try {
         const { id } = req.params;
-        // const hashedPassword = await Auth.hashPassword(password);
 
-        req.body.password = await Auth.hashPassword(req.body.password)
-        const updateduser = await users.findByIdAndUpdate(id, req.body, {
+        //req.body.password = await Auth.hashPassword(req.body.password)
+        const { fullName, employeeId, userPhotoUrl, mobile, idPhotoUrl, address, bloodGroup, dateOfBirth, employerDetails, ...otherDetails } = req.body;
+        const employeeDetails = { fullName, employeeId, userPhotoUrl, mobile, idPhotoUrl, address, bloodGroup, dateOfBirth };
+        const update = {
+            ...otherDetails,
+            employeeDetails,
+            employerDetails,
+        };
+        
+        const updateduser = await users.findByIdAndUpdate(id, update, {
             new: true
         });
 
@@ -210,7 +217,7 @@ const updateUserData = async (req, res) => {
         res.status(201).json(updateduser);
 
     } catch (error) {
-        res.status(400).json(error);
+        res.status(400).json({message: error.message});
     }
 }
 
