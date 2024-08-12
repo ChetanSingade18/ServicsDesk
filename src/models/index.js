@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 try {
-    mongoose.connect(`mongodb://127.0.0.1:27017/ServicDesk`);
+    mongoose.connect(`mongodb://127.0.0.1:27017/ServiceDesk`);
     console.log("mongoose connected successfully");
 } catch (error) {
     console.log(error);
