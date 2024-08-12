@@ -19,13 +19,16 @@ const employeeSchema = new mongoose.Schema({
     fullName: {
         type: String,
     },
-    mobile: {
+    employeeId: {
         type: String
     },
     userPhotoUrl: {
         type: String
     },
-    employeeId: {
+    mobile: {
+        type: String
+    },
+    idPhotoUrl: {
         type: String
     },
     address: {
@@ -41,10 +44,27 @@ const employeeSchema = new mongoose.Schema({
     _id: false
 });
 
+const employerSchema = new mongoose.Schema({
+    companyName: {
+        type: String,
+    },
+    companyEmail: {
+        type: String
+    },
+    dateOfJoining: {
+        type: String
+    },
+    designation: {
+        type: String
+    },
+}, {
+    _id: false
+});
+
 const userSchema = new mongoose.Schema({
     password: {
         type: String,
-        required: [true, "Password is required"]
+        required: true
     },
     generatedOTP: {
         type: String,
@@ -72,6 +92,7 @@ const userSchema = new mongoose.Schema({
         default: 'user'
     },
     employeeDetails: employeeSchema,
+    employerDetails: employerSchema,
     datecreated: Date,
     dateUpdated: Date
 
