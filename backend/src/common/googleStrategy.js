@@ -4,8 +4,8 @@ import users from "../models/user.js";
 import Auth from "./auth.js";
 
 passport.use(new GoogleStrategy({
-    clientID: `${process.env.CLIENT_ID}`,
-    clientSecret: `${process.env.CLIENT_SECRET}`,
+    clientID: `967180887823-ru81sq2qk2kablcl53gs7h7fsqu0s8vg.apps.googleusercontent.com`,
+    clientSecret: `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`,
     callbackURL: "/auth/google/callback"
   },
   async (accessToken, refreshToken, profile, done) => {
@@ -20,15 +20,22 @@ passport.use(new GoogleStrategy({
             const hashedPassword = await Auth.hashPassword(newPassword);
 
             user = await users.create({
-                employeeDetails: {
-                    fullName: profile._json.name,
-                },
+                // employeeDetails: {
+                //     fullName: profile._json.name,
+                // },
                 email: profile._json.email,
-                password: hashedPassword,            
+                password: hashedPassword, 
+                userName: profile._json.email           
             })
         }
-
-        const token = await Auth.createToken(user);
+        console.log("user",user);
+        const token = await Auth.createToken({
+            id: user._id,
+            userName: user.userName,
+            email: user.email,
+            role: user.role,
+            status: user.status
+        });
         return done(null, { user, token });
 
     } catch (error) {
