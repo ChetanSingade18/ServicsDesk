@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import '../Signin.css'
+import '../Signin.css';
+
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const navigate = useNavigate();
@@ -29,22 +30,25 @@ const ForgotPassword = () => {
   };
 
   return (
-    <Box className="centered-container">
-      <Box className="form-container">
-      <Typography variant="h4">Forgot Password</Typography>
-      <form onSubmit={handleSubmit}>
-        <TextField
-          label="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          fullWidth
-          margin="normal"
-        />
-        <Button type="submit" variant="contained" color="primary">
-          Send Reset Link
-        </Button>
-      </form>
-    </Box>
+    <Box className="sign-in-page"> {/* Apply the same class here */}
+      <Box className="centered-container">
+        <Box className="form-container">
+          <Typography variant="h4">Forgot Password</Typography>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+              margin="normal"
+              variant="outlined" // Ensure the outlined variant is used
+            />
+            <Button type="submit" variant="contained" color="primary" fullWidth>
+              Send Reset Link
+            </Button>
+          </form>
+        </Box>
+      </Box>
     </Box>
   );
 };

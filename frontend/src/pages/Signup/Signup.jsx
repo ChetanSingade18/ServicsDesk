@@ -44,7 +44,8 @@ const Signup = ({ onSignup }) => {
   };
 
   return (
-    <Box className="centered-container">
+    <Box className="sign-in-page">
+    <Box className="container">
       <Box className="form-container">
         <Container maxWidth="sm">
           <Typography variant="h4" gutterBottom>
@@ -93,6 +94,7 @@ const Signup = ({ onSignup }) => {
           </form>
         </Container>
       </Box>
+    </Box>
     </Box>
   );
 };

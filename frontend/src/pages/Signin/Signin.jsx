@@ -1,7 +1,8 @@
 import React from 'react';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import './Signin.css'
+import './Signin.css';
+
 const Signin = ({ onSignin }) => {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -36,41 +37,65 @@ const Signin = ({ onSignin }) => {
     }
   };
 
+   const handleGoogleLogin = () => {
+        // Redirect the user to the Google authentication endpoint on your backend
+        window.location.href = 'http://localhost:4000/auth/google';
+      };
+    
+
   return (
-    <Box className="centered-container">
-      <Box className="form-container">
-        <Typography variant="h4">Sign In</Typography>
-        {error && <Typography color="error">{error}</Typography>}
-        <form onSubmit={handleSubmit}>
-          <TextField
-            label="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
-          <Button type="submit" variant="contained" color="primary">
-            Sign In
-          </Button>
-        </form>
-        <Link to="/forgot-password">
-          <Typography variant="body2" color="primary">
-            Forgot Password?
-          </Typography>
-        </Link>
+    <Box className="sign-in-page">
+      <Box className="centered-container">
+        <Box className="form-container">
+          <Typography variant="h4">Sign In</Typography>
+          {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
+          <form onSubmit={handleSubmit}>
+            <TextField
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+              margin="normal"
+              variant='outlined'
+            />
+            <TextField
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              fullWidth
+              margin="normal"
+              variant='outlined'
+            />
+
+            <Button type="submit" variant="contained" color="primary" fullWidth>
+              Sign In
+            </Button>
+          </form>
+
+       {/* Google Sign In Button */}
+         <Button
+           variant="contained"
+           color="secondary"
+           fullWidth
+           onClick={handleGoogleLogin}
+           style={{ marginTop: '20px' }}
+         >
+           Sign in with Google
+         </Button>
+
+          <Link to="/forgot-password">
+            <Typography variant="body2" color="Black">
+              Forgot Password?
+            </Typography>
+          </Link>
+
           <Typography variant="body2" color="black">
-        {"Don't have a account? "}<Link to="/signup">
-            Sign up
-        </Link>{" now!"}
+            {"Don't have an account? "}<Link to="/signup">
+              Sign up
+            </Link>{" now!"}
           </Typography>
+        </Box>
       </Box>
     </Box>
   );
