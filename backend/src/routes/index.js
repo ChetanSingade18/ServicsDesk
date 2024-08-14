@@ -13,19 +13,22 @@ router.use('/user', UserRoutes);
 router.use('/tickets', TicketsRoutes);
 router.post('/upload', upload.single('file'), fileUpload);
 
-// FE use this endpoint ( /auth/google ) route to google auth
+//endpoint route to google auth
 router.get('/auth/google',
     passport.authenticate('google', { session: false, scope: ['profile', 'email'] }));
 
 router.get('/auth/google/callback',
-    passport.authenticate('google', { session: false, failureRedirect: `${process.env.FRONTEND_HOST}/account/login` }),
+    passport.authenticate('google', { session: false, failureRedirect: '/auth/google/failure' }),
     function (req, res) {
         const { user, token } = req.user;
         setTokenCookies(res, token);
 
-        //TODO
-        res.redirect(`${process.env.FRONTEND_HOST}/homePage`);
+        res.status(200).json({ user, token });
     }
 );
+
+router.get('/auth/google/failure', (req, res) => {
+    res.status(401).json({ message: 'Google Authentication Failed' });
+});
 
 export default router;
