@@ -4,8 +4,8 @@ import users from "../models/user.js";
 import Auth from "./auth.js";
 
 passport.use(new GoogleStrategy({
-    clientID: `client_id`,
-    clientSecret: `clientsecret`,
+    clientID: `${process.env.id}`,
+    clientSecret: `${process.env.secret}`,
     callbackURL: "/auth/google/callback"
   },
   async (accessToken, refreshToken, profile, done) => {
