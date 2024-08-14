@@ -143,7 +143,7 @@ const updateTicketStatus = async (req, res) => {
             if (status === Status.APPROVED) {
                 ticket.status = Status.APPROVED
                 ticket.approvedBy = req.headers.userId
-                ticket.reason = ` You can join a Google Meet to discuss further:https://meet.google.com/nxj-bwwb-mwp`
+                ticket.reason = `Your ticket is approved. We are working on it.`
             }
             else if (status === Status.RESOLVED) {
                 ticket.status = Status.RESOLVED
