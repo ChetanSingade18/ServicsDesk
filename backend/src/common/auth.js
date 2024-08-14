@@ -17,6 +17,7 @@ const createToken = async (payload) => {
     const token = await jwt.sign(payload, "hackathon_servicedesk_secret_key", {
         expiresIn: "1hr"
     })
+    console.log("token created successfully");
     return token;
 };
 
