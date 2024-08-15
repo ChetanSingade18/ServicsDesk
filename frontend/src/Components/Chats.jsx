@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
     Box,
     List,
@@ -11,7 +11,6 @@ import {
     Button,
     Typography,
     TextField,
-    Grid,
     Divider
 } from '@mui/material';
 
@@ -24,93 +23,78 @@ const Chats = ({ token, userId }) => {
     const [newMessage, setNewMessage] = useState('');
 
     // Fetch all messages
-    setInterval(async ()=>{
-        try{
-
+    const fetchMessages = useCallback(async () => {
+        try {
             const response = await fetch('http://localhost:4000/user/messages', {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
+
             if (response.ok) {
                 const data = await response.json();
-                if(messages.length!==data.length)
-                    fetchMessages();
-                // setChatHistory(groupedMessages[selectedUserId] || []);
+                setMessages(data);
+            } else {
+                console.error('Failed to fetch messages');
             }
-        }catch(e){
-            console.log(e)
-        }
-      },1000);
-    const fetchMessages = async () => {
-        try {
-            const response = await fetch('http://localhost:4000/user/messages', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch messages');
-            }
-
-            const data = await response.json();
-            setMessages(data);
         } catch (err) {
-            console.error(err.message);
+            console.error('Error fetching messages:', err.message);
         }
-    };
+    }, [token]);
 
     // Fetch user data
-    const fetchUserData = async () => {
+    const fetchUserData = useCallback(async () => {
         try {
             const response = await fetch('http://localhost:4000/user/getdata', {
-                method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                 },
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to fetch user data');
+            if (response.ok) {
+                const data = await response.json();
+                const userNameMap = data.userData.reduce((acc, user) => {
+                    acc[user._id] = user.userName;
+                    return acc;
+                }, {});
+                setUserNames(userNameMap);
+            } else {
+                console.error('Failed to fetch user data');
             }
-
-            const data = await response.json();
-            const userNameMap = data.userData.reduce((acc, user) => {
-                acc[user._id] = user.userName;
-                return acc;
-            }, {});
-            setUserNames(userNameMap);
         } catch (err) {
-            console.error(err.message);
+            console.error('Error fetching user data:', err.message);
         }
-    };
+    }, [token]);
 
+    // Set up the interval to periodically fetch messages
     useEffect(() => {
-        fetchMessages(); // Fetch messages on component mount
-        fetchUserData(); // Fetch user data on component mount
-    }, [token,selectedUserId]);
+        fetchMessages();
+        fetchUserData();
 
-    // Group messages by sender ID
+        const intervalId = setInterval(() => {
+            fetchMessages();
+        }, 30000);
+
+        return () => clearInterval(intervalId);
+    }, [fetchMessages, fetchUserData]);
+
+    // Group messages by sender/receiver ID
     useEffect(() => {
         const grouped = messages.reduce((acc, message) => {
             const senderId = message.sender._id;
             const receiverId = message.receiver._id;
-    
-            // Determine the correct grouping ID
-            const groupId = (senderId === userId) ? receiverId : senderId;
-    
+
+            const groupId = senderId === userId ? receiverId : senderId;
+
             if (!acc[groupId]) {
                 acc[groupId] = [];
             }
             acc[groupId].push(message);
             return acc;
         }, {});
-        console.log(grouped,"new grouped");
+
         setGroupedMessages(grouped);
-    }, [messages]);
-    
+    }, [messages, userId]);
 
     // Handle opening chat history
     const handleOpenChat = (userId) => {
@@ -126,31 +110,29 @@ const Chats = ({ token, userId }) => {
 
     // Handle sending a new message
     const handleSendMessage = async () => {
-        if (!newMessage.trim()) return; // Prevent sending empty messages
+        if (!newMessage.trim()) return;
 
         try {
             const response = await fetch('http://localhost:4000/user/message', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     message: newMessage,
-                    receiver: selectedUserId, // The ID of the user receiving the message
+                    receiver: selectedUserId,
                 }),
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to send message');
+            if (response.ok) {
+                setNewMessage('');
+                fetchMessages();
+            } else {
+                console.error('Failed to send message');
             }
-
-            // Clear the input and refresh chat history
-            setNewMessage('');
-            fetchMessages();
-            setChatHistory(groupedMessages[selectedUserId] || []);
         } catch (err) {
-            console.error(err.message);
+            console.error('Error sending message:', err.message);
         }
     };
 
@@ -161,12 +143,17 @@ const Chats = ({ token, userId }) => {
             </Typography>
             <List>
                 {Object.keys(groupedMessages).map((userId) => (
-                    <ListItem button key={userId} onClick={() => handleOpenChat(userId)} sx={{
-                        border: '1px solid #e0e0e0', // Add border to list items
-                        borderRadius: '8px', // Add border radius for rounded corners
-                        marginBottom: '8px', // Add some spacing between list items
-                    }}>
-                        <ListItemText primary={`${userNames[userId] || 'User'}`} />
+                    <ListItem
+                        button
+                        key={userId}
+                        onClick={() => handleOpenChat(userId)}
+                        sx={{
+                            border: '1px solid #e0e0e0',
+                            borderRadius: '8px',
+                            marginBottom: '8px',
+                        }}
+                    >
+                        <ListItemText primary={userNames[userId] || 'User'} />
                     </ListItem>
                 ))}
             </List>
@@ -180,21 +167,20 @@ const Chats = ({ token, userId }) => {
                     ) : (
                         chatHistory.map((msg, index) => (
                             <React.Fragment key={index}>
-                              <ListItem>
-                                <ListItemText primary={msg.message} secondary={msg.sender.userName} />
-                              </ListItem>
-                              {index < chatHistory.length - 1 && <Divider />}
+                                <ListItem>
+                                    <ListItemText primary={msg.message} secondary={msg.sender.userName} />
+                                </ListItem>
+                                {index < chatHistory.length - 1 && <Divider />}
                             </React.Fragment>
-                          ))
+                        ))
                     )}
-                    {/* Input for sending a new message */}
                     <TextField
                         label="Type your message"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         fullWidth
                         margin="normal"
-                        variant="outlined" // Use outlined variant for better visibility
+                        variant="outlined"
                     />
                 </DialogContent>
                 <DialogActions>
