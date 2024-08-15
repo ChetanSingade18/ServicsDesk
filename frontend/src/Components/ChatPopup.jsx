@@ -1,75 +1,76 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  IconButton,
-  TextField,
-  Typography,
-  Grid,
-} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, IconButton, TextField, Button, Typography, Paper, List, ListItem, ListItemText, Divider } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 
+// ChatPopup component
 const ChatPopup = ({ onClose, userId, token }) => {
-  const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-
-  // Fetch chat history for the user
-  const fetchChatHistory = async () => {
+  const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const fetchMessages = async () => {
     try {
       const response = await fetch('http://localhost:4000/user/messages', {
         headers: {
-          Authorization: `Bearer ${token}`, // Use the provided token for authentication
+          Authorization: `Bearer ${token}`,
         },
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch chat history');
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data); // Assuming the response contains an array of messages
+      } else {
+        console.error('Failed to fetch messages');
       }
-
-      const data = await response.json();
-      setMessages(data); // Assuming the API returns messages
     } catch (error) {
-      console.error('Error fetching chat history:', error);
+      console.error('Error fetching messages:', error);
+    } finally {
+      setLoading(false);
     }
   };
+  setInterval(async ()=>{
+    try{const response = await fetch('http://localhost:4000/user/messages', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (response.ok) {
+      const data = await response.json();
+      if(messages.length!==data.length)
+        fetchMessages();
+    }}catch(e){
+      console.log(e)
+    }
+  },1000);
 
   useEffect(() => {
-    fetchChatHistory(); // Fetch chat history when the component mounts
+    fetchMessages();
   }, [token]);
 
   const handleSendMessage = async () => {
-    if (message.trim() !== '') {
-      try {
-        const response = await fetch('http://localhost:4000/user/message', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`, // Use the provided token for authentication
-          },
-          body: JSON.stringify({
-            message,
-            receiver: 'admin', // Sending message to admin
-          }),
-        });
+    if (!newMessage.trim()) return;
 
-        if (!response.ok) {
-          throw new Error('Failed to send message');
-        }
+    try {
+      const response = await fetch('http://localhost:4000/user/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          message: newMessage,
+          receiver: 'admin', // Sending message to admin
+        }),
+      });
 
-        // Append the new message to the chat history
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          {
-            sender: userId,
-            receiver: 'admin',
-            message,
-            isAdmin: false, // Indicates the message is sent by the user
-          },
-        ]);
-        setMessage('');
-      } catch (error) {
-        console.error('Error sending message:', error);
+      if (response.ok) {
+        setNewMessage('');
+        fetchMessages();
+        console.log(messages) // Update messages with the new message
+      } else {
+        console.error('Failed to send message');
       }
+    } catch (error) {
+      console.error('Error sending message:', error);
     }
   };
 
@@ -77,81 +78,57 @@ const ChatPopup = ({ onClose, userId, token }) => {
     <Box
       sx={{
         position: 'fixed',
-        bottom: 80,
-        right: 16,
+        bottom: 75,
+        right: 0,
         width: 300,
-        backgroundColor: 'white',
-        boxShadow: 3,
+        height: '60vh',
+        maxHeight: '60vh',
+        margin: 2,
         borderRadius: 2,
-        p: 2,
+        boxShadow: 3,
+        overflow: 'hidden',
       }}
     >
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-        <Typography variant="h6">Chat with Admin</Typography>
-        <IconButton onClick={onClose} color="error">
-          <CloseIcon />
-        </IconButton>
-      </Box>
-      <Box
-        id="chat-box"
-        sx={{ maxHeight: 200, overflowY: 'auto', mb: 1 }}
-      >
-        {messages.map((msg, index) => (
-          <Box key={index} sx={{ mb: 1 }}>
-            <Grid container alignItems="center">
-              {msg.sender === userId ? (
-                // Message sent by user
-                <Grid item xs={12} sx={{ textAlign: 'right' }}>
-                  <Box
-                    sx={{
-                      backgroundColor: '#e0e0e0',
-                      color: 'text.primary',
-                      borderRadius: '12px',
-                      padding: '8px',
-                      maxWidth: '70%',
-                      display: 'inline-block',
-                    }}
-                  >
-                    {msg.message}
-                  </Box>
-                </Grid>
-              ) : (
-                // Message sent by admin
-                <Grid item xs={12}>
-                  <Box
-                    sx={{
-                      backgroundColor: '#3f51b5',
-                      color: 'white',
-                      borderRadius: '12px',
-                      padding: '8px',
-                      maxWidth: '70%',
-                      display: 'inline-block',
-                    }}
-                  >
-                    {msg.message}
-                  </Box>
-                </Grid>
-              )}
-            </Grid>
-          </Box>
-        ))}
-      </Box>
-      <Box display="flex" alignItems="center">
-        <TextField
-          variant="outlined"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyPress={(e) => {
-            if (e.key === 'Enter') {
-              handleSendMessage();
-            }
-          }}
-          sx={{ flexGrow: 1, mr: 1 }}
-        />
-        <IconButton onClick={handleSendMessage} color="primary" aria-label="send">
-          <SendIcon />
-        </IconButton>
-      </Box>
+      <Paper elevation={3} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 1, borderBottom: '1px solid #ddd' }}>
+          <Typography variant="h6">Chat</Typography>
+          <IconButton onClick={onClose} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Box sx={{ flex: 1, overflowY: 'auto', padding: 1 }}>
+          <List>
+            {loading ? (
+              <Typography>Loading...</Typography>
+            ) : (
+              messages.map((msg, index) => (
+                <React.Fragment key={index}>
+                  <ListItem>
+                    <ListItemText primary={msg.message} secondary={msg.sender.userName} />
+                  </ListItem>
+                  {index < messages.length - 1 && <Divider />}
+                </React.Fragment>
+              ))
+            )}
+          </List>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', padding: 1, borderTop: '1px solid #ddd' }}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Type a message"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSendMessage();
+            }}
+            sx={{ marginRight: 1 }}
+          />
+          <IconButton onClick={handleSendMessage} color="primary">
+            <SendIcon />
+          </IconButton>
+        </Box>
+      </Paper>
     </Box>
   );
 };

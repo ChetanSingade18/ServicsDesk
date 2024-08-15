@@ -12,6 +12,7 @@ import {
     Typography,
     TextField,
     Grid,
+    Divider
 } from '@mui/material';
 
 const Chats = ({ token, userId }) => {
@@ -23,6 +24,24 @@ const Chats = ({ token, userId }) => {
     const [newMessage, setNewMessage] = useState('');
 
     // Fetch all messages
+    setInterval(async ()=>{
+        try{
+
+            const response = await fetch('http://localhost:4000/user/messages', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if(messages.length!==data.length)
+                    fetchMessages();
+                // setChatHistory(groupedMessages[selectedUserId] || []);
+            }
+        }catch(e){
+            console.log(e)
+        }
+      },1000);
     const fetchMessages = async () => {
         try {
             const response = await fetch('http://localhost:4000/user/messages', {
@@ -77,14 +96,21 @@ const Chats = ({ token, userId }) => {
     useEffect(() => {
         const grouped = messages.reduce((acc, message) => {
             const senderId = message.sender._id;
-            if (!acc[senderId]) {
-                acc[senderId] = [];
+            const receiverId = message.receiver._id;
+    
+            // Determine the correct grouping ID
+            const groupId = (senderId === userId) ? receiverId : senderId;
+    
+            if (!acc[groupId]) {
+                acc[groupId] = [];
             }
-            acc[senderId].push(message);
+            acc[groupId].push(message);
             return acc;
         }, {});
+        console.log(grouped,"new grouped");
         setGroupedMessages(grouped);
     }, [messages]);
+    
 
     // Handle opening chat history
     const handleOpenChat = (userId) => {
@@ -121,10 +147,8 @@ const Chats = ({ token, userId }) => {
 
             // Clear the input and refresh chat history
             setNewMessage('');
-            setChatHistory((prev) => [
-                ...prev,
-                { message: newMessage, senderId: userId, _id: new Date().getTime() }, // Add the new message to chat history
-            ]);
+            fetchMessages();
+            setChatHistory(groupedMessages[selectedUserId] || []);
         } catch (err) {
             console.error(err.message);
         }
@@ -154,46 +178,14 @@ const Chats = ({ token, userId }) => {
                     {chatHistory.length === 0 ? (
                         <Typography>No messages found.</Typography>
                     ) : (
-                        chatHistory.map((msg) => (
-                            <Box key={msg._id} sx={{ mb: 1 }}>
-                                <Grid container alignItems="center">
-                                    {msg.senderId === userId ? (
-                                        // Message sent by admin
-                                        <Grid item xs={12} sx={{ textAlign: 'right' }}>
-                                            <Box
-                                                sx={{
-                                                    backgroundColor: '#e0e0e0',
-                                                    padding: '10px',
-                                                    borderRadius: '12px',
-                                                    display: 'inline-block',
-                                                    maxWidth: '70%',
-                                                    boxShadow: 1, // Add shadow for depth
-                                                }}
-                                            >
-                                                <Typography variant="body1">{msg.message}</Typography>
-                                            </Box>
-                                        </Grid>
-                                    ) : (
-                                        // Message received by admin
-                                        <Grid item xs={12}>
-                                            <Box
-                                                sx={{
-                                                    backgroundColor: '#3f51b5',
-                                                    color: 'white',
-                                                    padding: '10px',
-                                                    borderRadius: '12px',
-                                                    display: 'inline-block',
-                                                    maxWidth: '70%',
-                                                    boxShadow: 1, // Add shadow for depth
-                                                }}
-                                            >
-                                                <Typography variant="body1">{msg.message}</Typography>
-                                            </Box>
-                                        </Grid>
-                                    )}
-                                </Grid>
-                            </Box>
-                        ))
+                        chatHistory.map((msg, index) => (
+                            <React.Fragment key={index}>
+                              <ListItem>
+                                <ListItemText primary={msg.message} secondary={msg.sender.userName} />
+                              </ListItem>
+                              {index < chatHistory.length - 1 && <Divider />}
+                            </React.Fragment>
+                          ))
                     )}
                     {/* Input for sending a new message */}
                     <TextField

@@ -9,6 +9,7 @@ const CompanyForm = ({ onFormFilled }) => {
 
   const handleInputChange = () => {
     // Check if all fields are filled
+    console.log(companyName && companyEmail && dateOfJoining && designation)
     if (companyName && companyEmail && dateOfJoining && designation) {
       onFormFilled({
         companyName,
