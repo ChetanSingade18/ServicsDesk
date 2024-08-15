@@ -268,25 +268,22 @@ const forgetpassword = async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
-                user: "sender's email address", //TODO
-                pass: "sender's password", //TODO
+                user: "servicedesk.kfin@gmail.com", //TODO
+                pass: "vykthcnqfjmspcwq", //TODO
             },
         });
-        const resetUrl = `${`https://customer-relationship-management-mern.netlify.app/user/resetpassword`}`; //TODO
 
         const mailOptions = {
-            from: "sender's email address", //TODO
+            from: "servicedesk.kfin@gmail.com", //TODO
             to: user.email,
             subject: "Password Reset Request",
             html: `
         <p>Dear ${user.employeeDetails.fullName},</p>
         <p>We received a request to reset your password. Here is your One-Time Password (OTP): <strong>${otp}</strong></p>
         <p>This OTP is Expired in 5 minutes </p>
-        <p>Please click the following link to reset your password:</p>
-        <a href=${resetUrl}>Reset Password</a>
         <p>If you did not make this request, please ignore this email.</p>
         <p>Thank you,</p>
-        <p>From Validation</p>
+        <p>Service Desk</p>
       `,
         };
 

@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 try {
-    mongoose.connect(`mongodb://127.0.0.1:27017/ServiceDesk`);
+    mongoose.connect(`mongodb+srv://hackathon:kfintech_hackathon@cluster0.yag4u.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`);
     console.log("mongoose connected successfully");
 } catch (error) {
     console.log(error);
