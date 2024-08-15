@@ -1,23 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { Box, IconButton, TextField, Button, Typography, Paper, List, ListItem, ListItemText, Divider } from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Box, IconButton, TextField, Typography, Paper, List, ListItem, ListItemText, Divider } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 
-// ChatPopup component
 const ChatPopup = ({ onClose, userId, token }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const fetchMessages = async () => {
+
+  const fetchMessages = useCallback(async () => {
     try {
       const response = await fetch('http://localhost:4000/user/messages', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
       if (response.ok) {
         const data = await response.json();
-        setMessages(data); // Assuming the response contains an array of messages
+        setMessages(data);
       } else {
         console.error('Failed to fetch messages');
       }
@@ -26,25 +27,32 @@ const ChatPopup = ({ onClose, userId, token }) => {
     } finally {
       setLoading(false);
     }
-  };
-  setInterval(async ()=>{
-    try{const response = await fetch('http://localhost:4000/user/messages', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (response.ok) {
-      const data = await response.json();
-      if(messages.length!==data.length)
-        fetchMessages();
-    }}catch(e){
-      console.log(e)
-    }
-  },1000);
+  }, [token]);
 
   useEffect(() => {
     fetchMessages();
-  }, [token]);
+
+    const intervalId = setInterval(async () => {
+      try {
+        const response = await fetch('http://localhost:4000/user/messages', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (messages.length !== data.length) {
+            fetchMessages();
+          }
+        }
+      } catch (error) {
+        console.error('Error in interval fetch:', error);
+      }
+    }, 30000);
+
+    return () => clearInterval(intervalId);
+  }, [fetchMessages, messages.length]);
+
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;

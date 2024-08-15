@@ -5,6 +5,7 @@ import fileUpload from '../controllers/fileUpload.js';
 import upload from '../multerconfig/storageConfig.js';
 import passport from "passport";
 import "../common/googleStrategy.js";
+import users from "../models/user.js";
 import setTokenCookies from '../common/setTokenCookies.js';
 
 const router = express.Router();
@@ -19,11 +20,18 @@ router.get('/auth/google',
 
 router.get('/auth/google/callback',
     passport.authenticate('google', { session: false, failureRedirect: '/auth/google/failure' }),
-    function (req, res) {
+    async function (req, res) {
         const { user, token } = req.user;
         setTokenCookies(res, token);
-
-        res.status(200).json({ user, token });
+        console.log("user data",user,token);
+        let userData = await users.findOne({ email: user.email }, { password: 0, createdAt: 0, generatedOTP: 0, generatedOTPExpires: 0});
+        userData._id = user._id;
+        console.log(userData);
+        res.status(200).send({
+            message: "login Successfull",
+            token,
+            userData
+        });
     }
 );
 
