@@ -4,7 +4,6 @@ import {
   Routes,
   Route,
   Navigate,
-  Link,
 } from "react-router-dom";
 import {
   AppBar,
@@ -13,7 +12,6 @@ import {
   CssBaseline,
   Divider,
   Drawer,
-  Fab,
   IconButton,
   List,
   ListItem,
@@ -23,6 +21,7 @@ import {
   Toolbar,
   Typography,
   Avatar,
+  Fab,
 } from "@mui/material";
 import ChatIcon from "@mui/icons-material/Chat";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -39,6 +38,7 @@ import ForgotPassword from "./pages/Signin/Password/ForgotPassword";
 import VerifyOtp from "./pages/Signin/Password/VerifyOtp";
 import ChatPopup from "./Components/ChatPopup";
 import Chats from "./Components/Chats";
+import VideoPlayer from "./Components/VideoPlayer"; // Import VideoPlayer component
 
 const drawerWidth = 240;
 
@@ -51,6 +51,7 @@ const App = () => {
     "asdfghjkjhgfdsasdfghjkjhgfdsasdfghjkjhgfdsa"
   ); // State to store the authentication token
   const [userData, setUserData] = useState({}); // State to store user data
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false); // State for video player visibility
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -110,6 +111,10 @@ const App = () => {
     setIsLoggedIn(false);
   };
 
+  const handleToggleVideoPlayer = () => {
+    setShowVideoPlayer(!showVideoPlayer);
+  };
+
   return (
     <Router>
       <div>
@@ -130,6 +135,14 @@ const App = () => {
               </Typography>
               <Box sx={{ flexGrow: 1 }} />{" "}
               {/* This will push the button to the right */}
+              <Button
+                color="secondary"
+                onClick={handleToggleVideoPlayer}
+                variant="contained"
+                sx={{ marginLeft: 2 }}
+              >
+                Video Tutorial
+              </Button>
               <Button
                 color="error" // Set the button color to red
                 onClick={handleSignout}
@@ -340,7 +353,7 @@ const App = () => {
             }
           />
         </Routes>
-        {isLoggedIn && userData?.role !== "admin" && (
+        {userData?.role !== "admin" && (
           <Box sx={{ display: "flex" }}>
             <Fab
               color="primary"
@@ -354,7 +367,7 @@ const App = () => {
             >
               <ChatIcon />
             </Fab>
-            {showChatPopup && (
+            {showChatPopup && userData?.role !== "admin" && (
               <ChatPopup
                 userId={userData._id}
                 userName={userData.userName}
@@ -363,6 +376,13 @@ const App = () => {
               />
             )}
           </Box>
+        )}
+        {showVideoPlayer && (
+          <VideoPlayer
+            isExpanded={false}
+            onClose={() => setShowVideoPlayer(false)}
+            onExpand={() => setShowVideoPlayer(true)}
+          />
         )}
       </div>
     </Router>
